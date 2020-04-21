@@ -1,3 +1,7 @@
+## 1.33 (Nov 9, 2019)
+- Bug fixes
+- Enhanced configuration support
+- Support for carrying forward gRPC headers to service implementations
 
 ## 1.0 (Jan 11, 2019)
 - **New features:**

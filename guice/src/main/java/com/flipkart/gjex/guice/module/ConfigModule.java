@@ -15,27 +15,18 @@
  */
 package com.flipkart.gjex.guice.module;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
-import javax.validation.Validator;
 
 import org.apache.commons.configuration.Configuration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flipkart.gjex.core.GJEXConfiguration;
-import com.flipkart.gjex.core.GJEXError;
-import com.flipkart.gjex.core.config.ConfigurationException;
-import com.flipkart.gjex.core.config.ConfigurationFactory;
-import com.flipkart.gjex.core.config.ConfigurationFactoryFactory;
-import com.flipkart.gjex.core.config.ConfigurationSourceProvider;
 import com.flipkart.gjex.core.config.FlattenedConfiguration;
 import com.flipkart.gjex.core.setup.Bootstrap;
-import com.flipkart.gjex.core.util.Pair;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.binder.LinkedBindingBuilder;
@@ -50,41 +41,11 @@ import com.google.inject.name.Names;
 @SuppressWarnings("rawtypes")
 public class ConfigModule<T extends GJEXConfiguration, U extends Map> extends AbstractModule {
 
-    private final Bootstrap<T, U> bootstrap;
-
-    private final T configuration;
     private final U configMap;
 
-    public ConfigModule(Bootstrap<T, U> _bootstrap) {
-        this.bootstrap = _bootstrap;
-        try {
-            Pair<T, U> pair = parseConfiguration(bootstrap.getConfigurationFactoryFactory(), bootstrap.getConfigurationSourceProvider(),
-                    bootstrap.getValidatorFactory().getValidator(), bootstrap.getConfigPath(), bootstrap.getConfigurationClass(),
-                    bootstrap.getObjectMapper());
-            configuration = pair.getKey();
-            configMap = pair.getValue();
-            this.bootstrap.setConfiguration(configuration); // NOTE
-            this.bootstrap.setConfigMap(configMap); // NOTE
-        } catch (ConfigurationException  | IOException e) {
-            throw new GJEXError(GJEXError.ErrorType.runtime, "Error occurred while reading/parsing configuration " +
-                    "from source " + bootstrap.getConfigPath(), e);
-        }
+    public ConfigModule(Bootstrap<T, U> bootstrap) {
+        this.configMap = bootstrap.getConfigMap();
     }
-
-    private Pair<T, U> parseConfiguration(ConfigurationFactoryFactory<T, U> configurationFactoryFactory,
-                                          ConfigurationSourceProvider provider,
-                                          Validator validator,
-                                          String configPath,
-                                          Class<T> klass,
-                                          ObjectMapper objectMapper) throws IOException, ConfigurationException {
-        final ConfigurationFactory<T, U> configurationFactory = configurationFactoryFactory
-                .create(klass, validator, objectMapper);
-        if (configPath != null) {
-            return configurationFactory.build(provider, configPath);
-        }
-        return configurationFactory.build();
-    }
-
 
     @SuppressWarnings({"unchecked" })
 	@Override
